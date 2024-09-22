@@ -1,0 +1,171 @@
+import React, { useState, useEffect } from 'react';
+import { Home, BarChart2, PlusSquare, Bell, User, Search } from 'lucide-react';
+
+const NetflixLikeAnimation = ({ onAnimationComplete }) => {
+  const [displayText, setDisplayText] = useState('');
+  const fullText = 'PROD-ARTIST';
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const appearInterval = setInterval(() => {
+      if (currentIndex <= fullText.length) {
+        setDisplayText(fullText.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(appearInterval);
+        setTimeout(() => {
+          const disappearInterval = setInterval(() => {
+            if (currentIndex > 0) {
+              setDisplayText(fullText.slice(0, currentIndex - 1));
+              currentIndex--;
+            } else {
+              clearInterval(disappearInterval);
+              onAnimationComplete();
+            }
+          }, 100);
+        }, 1000);
+      }
+    }, 100);
+
+    return () => clearInterval(appearInterval);
+  }, [onAnimationComplete]);
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-black">
+      <h1 
+        className="text-6xl font-bold text-red-600 transition-all duration-300 ease-in-out"
+        style={{ fontFamily: 'Gotham, sans-serif' }}
+      >
+        {displayText}
+      </h1>
+    </div>
+  );
+};
+
+const RegistrationScreen = ({ onRegistrationComplete }) => {
+  const [registrationMethod, setRegistrationMethod] = useState(null);
+  const [email, setEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [enteredCode, setEnteredCode] = useState('');
+
+  const handleGoogleRegistration = () => {
+    // Simular autenticación de Google
+    setTimeout(() => onRegistrationComplete(), 2000);
+  };
+
+  const handleFacebookRegistration = () => {
+    // Simular autenticación de Facebook
+    setTimeout(() => onRegistrationComplete(), 2000);
+  };
+
+  const handleEmailRegistration = () => setRegistrationMethod('email');
+
+  const sendVerificationCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000);
+    setVerificationCode(code.toString());
+    alert(`Código de verificación enviado a ${email}: ${code}`);
+  };
+
+  const verifyCode = () => {
+    if (enteredCode === verificationCode) {
+      onRegistrationComplete();
+    } else {
+      alert('Código incorrecto. Por favor, inténtelo de nuevo.');
+    }
+  };
+
+  const renderRegistrationForm = () => {
+    switch (registrationMethod) {
+      case 'email':
+        return (
+          <div className="mt-4">
+            <input 
+              className="w-64 p-2 mb-2 border rounded" 
+              placeholder="Correo electrónico" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button 
+              className="w-64 py-2 mb-2 bg-green-500 text-white rounded"
+              onClick={sendVerificationCode}
+            >
+              Enviar código
+            </button>
+            {verificationCode && (
+              <>
+                <input 
+                  className="w-64 p-2 mb-2 border rounded" 
+                  placeholder="Código de verificación"
+                  value={enteredCode}
+                  onChange={(e) => setEnteredCode(e.target.value)}
+                />
+                <button 
+                  className="w-64 py-2 bg-blue-500 text-white rounded"
+                  onClick={verifyCode}
+                >
+                  Verificar
+                </button>
+              </>
+            )}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <h2 className="text-2xl font-bold mb-6">Registrarse</h2>
+      <button onClick={handleGoogleRegistration} className="w-64 py-2 mb-2 bg-red-600 text-white rounded">Google</button>
+      <button onClick={handleFacebookRegistration} className="w-64 py-2 mb-2 bg-blue-700 text-white rounded">Facebook</button>
+      <button onClick={handleEmailRegistration} className="w-64 py-2 mb-2 bg-gray-300 text-gray-700 rounded">Registrarse con correo electrónico</button>
+      {renderRegistrationForm()}
+    </div>
+  );
+};
+
+const MainInterface = () => (
+  <div className="flex flex-col h-screen">
+    <header className="flex justify-between items-center p-4 bg-gray-800 text-white">
+      <h1 className="text-xl font-bold">PROD-ARTIST</h1>
+      <Search size={24} />
+    </header>
+    <main className="flex-grow p-4">
+      <h2 className="text-2xl font-bold mb-4">Bienvenido a PROD-ARTIST</h2>
+      <p>Contenido principal aquí...</p>
+    </main>
+    <nav className="flex justify-around p-4 bg-gray-200">
+      <Home />
+      <BarChart2 />
+      <PlusSquare />
+      <Bell />
+      <User />
+    </nav>
+  </div>
+);
+
+const App = () => {
+  const [currentScreen, setCurrentScreen] = useState('splash');
+
+  const handleAnimationComplete = () => {
+    setCurrentScreen('registration');
+  };
+
+  const handleRegistrationComplete = () => {
+    setCurrentScreen('main');
+  };
+
+  switch (currentScreen) {
+    case 'splash':
+      return <NetflixLikeAnimation onAnimationComplete={handleAnimationComplete} />;
+    case 'registration':
+      return <RegistrationScreen onRegistrationComplete={handleRegistrationComplete} />;
+    case 'main':
+      return <MainInterface />;
+    default:
+      return <NetflixLikeAnimation onAnimationComplete={handleAnimationComplete} />;
+  }
+};
+
+export default App;
